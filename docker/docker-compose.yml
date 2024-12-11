@@ -1,0 +1,22 @@
+version: '3.3'
+services:
+  nginx:
+    image: ghcr.io/dmitrydeco/portainer-test-nginx:latest
+    container_name: nginx
+    healthcheck:
+      test: "netstat -an | grep :80"
+      interval: 5s
+      timeout: 5s
+      retries: 3
+    build:
+      context: ../.
+      dockerfile: ./docker/nginx/Dockerfile
+    restart: always
+    command: [nginx-debug, '-g', 'daemon off;']
+    networks:
+      - net
+    ports:
+      - "5401:80"
+networks:
+  net:
+    driver: bridge

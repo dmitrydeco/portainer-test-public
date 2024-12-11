@@ -1,0 +1,34 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+#      - name: Set TAG variable
+#        id: set_tag
+#        run: echo "TAG=$(date +%Y%m%d%H%M%S)-${GITHUB_SHA:0:7}" >> $GITHUB_ENV
+
+      # Вход в приватный реестр Docker
+      - name: Login to Docker Registry
+        run: |
+          echo "${{ secrets.ACCESS_TOKEN }}" | docker login ghcr.io -u "${{ secrets.REGISTRY_USERNAME }}" --password-stdin
+
+#      - name: Update tag in stack.yml and Nginx Dockerfile
+#        run: |
+#          sed -i "s|\${TAG}|${{ env.TAG }}|g" docker/stack.yml
+#          sed -i "s|\${TAG}|${{ env.TAG }}|g" docker/nginx/Dockerfile
+
+      - name: Build Docker images
+#        run: TAG=${{ env.TAG }} docker compose -f docker/docker-compose.yml build
+        run: docker compose -f docker/docker-compose.yml build
+
+      - name: Push Docker images
+        run: docker compose -f docker/docker-compose.yml push
